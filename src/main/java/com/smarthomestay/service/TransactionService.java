@@ -2,9 +2,10 @@ package com.smarthomestay.service;
 
 import com.smarthomestay.constant.PaymentStatus;
 import com.smarthomestay.dto.PaymentDTO;
-import com.smarthomestay.entity.Bill;
 import com.smarthomestay.entity.Room;
-import com.smarthomestay.repository.*;
+import com.smarthomestay.repository.BillRepository;
+import com.smarthomestay.repository.RoomRepository;
+import com.smarthomestay.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +15,6 @@ import java.util.Date;
 @RequiredArgsConstructor
 public class TransactionService {
   private final TransactionRepository transactionRepository;
-  private final UserRepository userRepository;
   private final RoomRepository roomRepository;
   private final BillRepository billRepository;
 
@@ -37,8 +37,8 @@ public class TransactionService {
     return result;
   }
 
-  public Object receivePayment(long userId, PaymentDTO paymentDTO) {
-    var checkBill = billRepository.findByUserId(userId);
+  public Object receivePayment(PaymentDTO paymentDTO) {
+    var checkBill = billRepository.findByUserId(paymentDTO.getUserId());
 
     if (checkBill.getPaymentStatus() == PaymentStatus.PAID) {
       return "Bill has been paid";
@@ -52,7 +52,7 @@ public class TransactionService {
       return "please pay the exact amount";
     }
 
-    transactionRepository.receivePayment(userId, 0, "PAID");
+    transactionRepository.receivePayment(paymentDTO.getUserId(), 0, "PAID");
     return "Receive payment success";
   }
 

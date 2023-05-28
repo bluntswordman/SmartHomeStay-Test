@@ -1,6 +1,5 @@
 package com.smarthomestay.config;
 
-import com.smarthomestay.constant.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,18 +21,19 @@ public class SecurityConfig {
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http
-        .csrf(csrf -> csrf.disable())
-        .cors(cors -> cors.disable())
-        .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/v1/auth/**").permitAll()
-//            .requestMatchers("/v1/employee/**").hasAuthority("ROLE_EMPLOYEE")
-//            .requestMatchers("/v1/user/**").hasAuthority("ROLE_USER")
-            .anyRequest().authenticated()
-        )
-        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .authenticationProvider(authenticationProvider)
-        .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-        .httpBasic(Customizer.withDefaults());
+            .csrf(csrf -> csrf.disable())
+            .cors(cors -> cors.disable())
+            .authorizeHttpRequests(auth -> auth
+                    .requestMatchers("/v1/auth/**").permitAll()
+                    .requestMatchers("/swagger-ui/**").permitAll()
+                    .requestMatchers("/v1/transaction/calculate-price").hasAnyAuthority("ROLE_EMPLOYEE")
+                    .requestMatchers("/v1/transaction/receive-payment").hasAnyAuthority("ROLE_EMPLOYEE")
+                    .anyRequest().authenticated()
+            )
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authenticationProvider(authenticationProvider)
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+            .httpBasic(Customizer.withDefaults());
 
     return http.build();
   }

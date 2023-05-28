@@ -1,6 +1,7 @@
 package com.smarthomestay.controller;
 
 import com.smarthomestay.constant.PaymentStatus;
+import com.smarthomestay.dto.CalculateDTO;
 import com.smarthomestay.dto.PaymentDTO;
 import com.smarthomestay.dto.TransactionDTO;
 import com.smarthomestay.service.AuthService;
@@ -42,14 +43,13 @@ public class TransactionController {
     return ResponseEntity.status(HttpStatus.CREATED).build();
   }
 
-  @GetMapping("/calculate-price")
-  public ResponseEntity<?> calculatePrice(HttpServletRequest request) {
-    long userId = authService.getCurrentUser(request).getId();
-    if (userId == 0) {
+  @PostMapping("/calculate-price")
+  public ResponseEntity<?> calculatePrice(@RequestBody CalculateDTO request) {
+    if (request.getUserId() == 0) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
-    double price = transactionService.calculatePrice(userId);
+    double price = transactionService.calculatePrice(request.getUserId());
     Map<String, Double> result = Map.of("Total Price", price);
     return ResponseEntity.status(HttpStatus.OK).body(result);
   }
@@ -67,13 +67,12 @@ public class TransactionController {
 
 
   @PostMapping("/receive-payment")
-  public ResponseEntity<?> receivePayment(@RequestBody PaymentDTO payment, HttpServletRequest request, Errors errors) {
-    long userId = authService.getCurrentUser(request).getId();
-    if (userId == 0) {
+  public ResponseEntity<?> receivePayment(@RequestBody PaymentDTO payment) {
+    if (payment.getUserId() == 0) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
-    Object result = transactionService.receivePayment(userId, payment);
+    Object result = transactionService.receivePayment(payment);
     return ResponseEntity.status(HttpStatus.OK).body(result);
   }
 }
